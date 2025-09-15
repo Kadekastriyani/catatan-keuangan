@@ -216,8 +216,7 @@
 
       <div style="display:flex; gap:8px; align-items:flex-end;" class="controls">
         <button class="btn-add" id="addBtn">Tambah </button>
-        <button class="btn-clear" id="clearForm">Bersih</button>
-        <button class="btn-export" id="downloadCSV">CSV</button>
+        <button class="btn-clear" id="clearForm">Bersihkan</button>
         <button class="btn-clear" id="printBtn">PDF</button>
         <button class="btn-delete" id="clearAllBtn">Hapus</button>
       </div>
@@ -264,7 +263,6 @@ const tbody = document.getElementById('tbody');
 const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
 const balanceEl = document.getElementById('balance');
-const downloadCSV = document.getElementById('downloadCSV');
 const printBtn = document.getElementById('printBtn');
 
 const STORAGE_KEY = 'transactions_v1';
@@ -322,11 +320,22 @@ function render(){
       <td class="right">${formatRupiah(running)}</td>
       <td class="right">
         <div class="actions">
-          <button data-id="${t.id}" class="btn-delete" onclick="deleteTx('${t.id}')">Hapus</button>
+          <button class="btn-delete" data-id="${t.id}">Hapus</button>
         </div>
       </td>
     `;
     tbody.appendChild(tr);
+  });
+
+  // tambahkan event listener hanya setelah tabel dirender
+  tbody.querySelectorAll(".btn-delete").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      if(!confirm("Hapus transaksi ini?")) return;
+      const newTx = loadTx().filter(t => t.id !== id);
+      saveTx(newTx);
+      render();
+    });
   });
 
   totalIncomeEl.textContent = formatRupiah(totalIncome);
@@ -380,52 +389,8 @@ clearAllBtn.addEventListener('click', function(){
   }
 });
 
-window.deleteTx = function(id){
-  if(!confirm('Hapus transaksi ini?')) return;
-  const tx = loadTx().filter(t => t.id !== id);
-  saveTx(tx);
-  render();
-}
 
-/* export CSV */
-downloadCSV.addEventListener('click', function(){
-  const tx = loadTx();
-  if(tx.length === 0){ alert('Tidak ada data untuk diekspor.'); return; }
 
-  // build CSV with running balance
-  let csv = 'No,Tanggal,Keterangan,Pemasukan (Rp),Pengeluaran (Rp),Saldo (Rp)\\n';
-  let running = 0;
-  tx.sort((a,b)=>(a.date > b.date)?1:(a.date < b.date ? -1 : 0));
-  tx.forEach((t, i)=>{
-    const income = t.type === 'income' ? t.amount : 0;
-    const expense = t.type === 'expense' ? t.amount : 0;
-    running += (income - expense);
-    const row = [
-      i+1,
-      t.date,
-      '"' + t.desc.replace(/"/g,'""') + '"',
-      income,
-      expense,
-      running
-    ].join(',');
-    csv += row + '\\n';
-  });
-
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'catatan_keuangan.csv';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-});
-
-/* print */
-printBtn.addEventListener('click', function(){
-  window.print();
-});
 
 /* initial setup */
 (function init(){
@@ -434,5 +399,99 @@ printBtn.addEventListener('click', function(){
   render();
 })();
 </script>
+<!-- Tambahkan jsPDF + AutoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+printBtn.addEventListener('click', function(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const tx = loadTx();
+  tx.sort((a,b)=>(a.date > b.date)?1:(a.date < b.date ? -1 : 0));
+
+  let totalIncome = 0, totalExpense = 0, running = 0;
+  tx.forEach(t => {
+    if(t.type === 'income') totalIncome += t.amount;
+    if(t.type === 'expense') totalExpense += t.amount;
+  });
+  const saldo = totalIncome - totalExpense;
+
+  // === Header ===
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("LAPORAN KEUANGAN", 105, 15, {align:"center"});
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Dicetak: ${new Date().toLocaleDateString("id-ID")}`, 105, 22, {align:"center"});
+
+  // === Kotak Ringkasan ===
+  doc.setDrawColor(0);
+  doc.setFillColor(245, 245, 245); // abu muda
+  doc.roundedRect(14, 30, 182, 25, 3, 3, "F");
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Ringkasan:", 18, 38);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Total Pemasukan : ${formatRupiah(totalIncome)}`, 18, 45);
+  doc.text(`Total Pengeluaran : ${formatRupiah(totalExpense)}`, 85, 45);
+  doc.text(`Saldo : ${formatRupiah(saldo)}`, 150, 45);
+
+  // === Tabel Transaksi ===
+  const tableData = [];
+  running = 0;
+  tx.forEach((t,i)=>{
+    const income = t.type === 'income' ? t.amount : 0;
+    const expense = t.type === 'expense' ? t.amount : 0;
+    running += (income - expense);
+    tableData.push([
+      i+1,
+      t.date,
+      t.desc,
+      income ? formatRupiah(income) : "-",
+      expense ? formatRupiah(expense) : "-",
+      formatRupiah(running)
+    ]);
+  });
+
+  if (tableData.length > 0) {
+    doc.autoTable({
+      startY: 60,
+      head: [['No', 'Tanggal', 'Keterangan', 'Pemasukan', 'Pengeluaran', 'Saldo']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [33, 150, 243], // biru
+        textColor: 255,
+        halign: 'center',
+        fontStyle: 'bold'
+      },
+      bodyStyles: {
+        halign: 'center'
+      },
+      columnStyles: {
+        2: { halign: 'left' }, // kolom keterangan rata kiri
+        3: { halign: 'right' },
+        4: { halign: 'right' },
+        5: { halign: 'right' }
+      }
+    });
+  } else {
+    doc.setFontSize(12);
+    doc.text("Tidak ada data transaksi.", 14, 70);
+  }
+
+  // === Footer ===
+  const pageHeight = doc.internal.pageSize.height;
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text("Laporan keuangan ini dihasilkan otomatis oleh aplikasi.", 105, pageHeight - 10, {align:"center"});
+
+  doc.save('laporan_keuangan.pdf');
+});
+</script>
+
 </body>
 </html>
