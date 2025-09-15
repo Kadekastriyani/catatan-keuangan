@@ -62,6 +62,12 @@
     align-items:flex-end;
     flex-wrap:wrap;
   }
+  .form-area h4 {
+  text-align: center;
+  width: 100%;
+  margin: 4px 0 10px;   /* atas kecil (4px), bawah lebih rapat (10px) */
+}
+
   label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
   input[type="text"], input[type="date"], select, input[type="number"]{
     padding:8px 10px;
@@ -98,6 +104,7 @@
     box-shadow: 0 6px 16px rgba(18,40,61,0.04);
     overflow-x:auto; /* ✅ biar bisa scroll di hp */
   }
+  
   table{
     width:100%;
     border-collapse:collapse;
@@ -169,11 +176,11 @@
 
     <div class="cards" id="summary">
       <div class="card">
-        <h3>Total Pemasukan</h3>
+        <h3>Pemasukan</h3>
         <p id="total-income">Rp 0</p>
       </div>
       <div class="card">
-        <h3>Total Pengeluaran</h3>
+        <h3>Pengeluaran</h3>
         <p id="total-expense">Rp 0</p>
       </div>
       <div class="card">
@@ -183,6 +190,7 @@
     </div>
 
     <div class="form-area">
+        <h4>Tambah Transaksi</h4>
       <div class="form-col">
         <label for="date">Tanggal</label>
         <input type="date" id="date">
@@ -215,8 +223,8 @@
       </div>
     </div>
 
+    
     <div class="table-wrap">
-      <h3>Data Keuangan</h3>
       <table id="txTable" aria-live="polite">
         <thead>
           <tr>
