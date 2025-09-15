@@ -27,18 +27,17 @@
     max-width:96%;
   }
 
-  .header{
-    text-align:center;
-    margin-bottom:18px;
-  }
-  h1{ margin:6px 0; font-size:22px; }
-  p.lead{ color:var(--muted); margin:0 0 12px;}
+  .header{text-align:center;margin-bottom:18px;}
+  h1{margin:6px 0;font-size:22px;}
+  p.lead{color:var(--muted);margin:0 0 12px;}
 
+  /* --- Cards Summary --- */
   .cards{
     display:flex;
     gap:12px;
     margin-bottom:16px;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+    justify-content:space-between;
   }
   .card{
     background:var(--card);
@@ -46,11 +45,13 @@
     padding:14px;
     border-radius:10px;
     flex:1;
-    min-width:200px;
+    min-width:0;
+    text-align:center;
   }
-  .card h3{ margin:0; font-size:13px; color:var(--muted); font-weight:600;}
-  .card p{ margin:6px 0 0; font-size:18px; font-weight:700; }
+  .card h3{margin:0;font-size:13px;color:var(--muted);font-weight:600;}
+  .card p{margin:6px 0 0;font-size:18px;font-weight:700;}
 
+  /* --- Form Area --- */
   .form-area{
     display:flex;
     gap:12px;
@@ -61,61 +62,102 @@
     align-items:flex-end;
     flex-wrap:wrap;
   }
-  label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
-  input[type="text"], input[type="date"], select{
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
+  input[type="text"], input[type="date"], select, input[type="number"]{
     padding:8px 10px;
     border-radius:6px;
     border:1px solid #dfe6ea;
-    width:220px;
     box-sizing:border-box;
   }
-  input[type="number"]{ width:160px; padding:8px 10px; border-radius:6px; border:1px solid #dfe6ea;}
-  .form-col{ display:flex; gap:6px; flex-direction:column; }
+  input[type="text"],input[type="date"],select{width:220px;}
+  input[type="number"]{width:160px;}
+  .form-col{display:flex;gap:6px;flex-direction:column;}
 
-  .controls{ display:flex; gap:8px; flex-wrap:wrap; }
-  button{
-    border:0; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;
-    box-shadow: 0 2px 6px rgba(18,40,61,0.06);
+  /* --- Controls --- */
+  .controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:nowrap;
+    justify-content:space-between;
+    width:100%;
   }
-  .btn-add{ background:var(--accent); color:white;}
-  .btn-clear{ background:#f1f1f1; color:#333;}
-  .btn-delete{ background:var(--danger); color:white;}
-  .btn-export{ background:#ffbf00; color:#222; }
+  button{
+    border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;
+    box-shadow: 0 2px 6px rgba(18,40,61,0.06);
+    flex:1; /* supaya sejajar rapi */
+  }
+  .btn-add{background:var(--accent);color:white;}
+  .btn-clear{background:#f1f1f1;color:#333;}
+  .btn-delete{background:var(--danger);color:white;}
+  .btn-export{background:#ffbf00;color:#222;}
 
   .table-wrap{
     background:var(--card);
     padding:14px;
     border-radius:10px;
     box-shadow: 0 6px 16px rgba(18,40,61,0.04);
+    overflow-x:auto; /* ✅ biar bisa scroll di hp */
   }
   table{
     width:100%;
     border-collapse:collapse;
+    min-width: 700px; /* ✅ supaya layout tetap rapi */
     font-size:14px;
   }
   thead th{
     background:var(--table-head);
     text-align:left;
-    padding:10px;
+    padding:10px 8px;
     font-size:13px;
     color:var(--muted);
     border-bottom:1px solid #edf1f3;
+    white-space:nowrap;
   }
-  tbody td{ padding:10px; border-bottom:1px solid #f2f4f6; vertical-align:middle; }
-  tbody tr:last-child td{ border-bottom:0; }
+  tbody td{
+    padding:10px 8px;
+    border-bottom:1px solid #f2f4f6;
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{border-bottom:0;}
 
-  .right{ text-align:right; }
-  .muted{ color:var(--muted); font-size:13px; }
+  /* ✅ Lebar dan alignment kolom */
+  th:nth-child(1), td:nth-child(1) { width:50px; text-align:center; }
+  th:nth-child(2), td:nth-child(2) { width:120px; white-space:nowrap; }
+  th:nth-child(4), td:nth-child(4),
+  th:nth-child(5), td:nth-child(5),
+  th:nth-child(6), td:nth-child(6) {
+    text-align:right;
+    width:150px;
+    white-space:nowrap;
+  }
+  th:nth-child(7), td:nth-child(7) { width:100px; text-align:center; }
+  
+  .right{text-align:right;}
+  .actions{display:flex;gap:4px;justify-content:center;}
 
-  .actions{ display:flex; gap:6px; }
-
+  /* --- Responsive untuk HP --- */
   @media (max-width:680px){
-    .form-area{flex-direction:column; align-items:stretch;}
-    input[type="text"], input[type="date"], select, input[type="number"]{ width:100%;}
-    .cards{flex-direction:column;}
-  }
+    body{padding:12px;}
+    h1{font-size:18px;}
 
+    /* Cards tetap sejajar 3 kolom */
+    .cards{
+      flex-wrap:nowrap;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+    }
+    .card p{font-size:16px;}
+
+    /* Form input satu kolom, tombol sejajar */
+    .form-area{flex-direction:column;align-items:stretch;}
+    input[type="text"],input[type="date"],select,input[type="number"]{width:100%;}
+    .controls{flex-wrap:nowrap;gap:6px;}
+    .controls button{flex:1;}
+  }
 </style>
+
+
 </head>
 <body>
   <div class="container">
@@ -164,11 +206,11 @@
       </div>
 
       <div style="display:flex; gap:8px; align-items:flex-end;" class="controls">
-        <button class="btn-add" id="addBtn">Tambah</button>
+        <button class="btn-add" id="addBtn">Tambah </button>
         <button class="btn-clear" id="clearForm">Bersihkan</button>
         <button class="btn-export" id="downloadCSV">CSV</button>
         <button class="btn-clear" id="printBtn">PDF</button>
-        <button class="btn-delete" id="clearAllBtn">Hapus Semua</button>
+        <button class="btn-delete" id="clearAllBtn">Hapus</button>
       </div>
     </div>
 
