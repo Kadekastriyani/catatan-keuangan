@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Catatan Keuangan Sederhana</title>
 <style>
-  :root{
+   :root {
     --bg:#f4f7fb;
     --card:#ffffff;
     --accent:#2f8f6b;
@@ -74,22 +74,36 @@
   .form-col{display:flex;gap:6px;flex-direction:column;}
 
   /* --- Controls --- */
-  .controls{
-    display:flex;
-    gap:8px;
-    flex-wrap:nowrap;
-    justify-content:space-between;
-    width:100%;
-  }
-  button{
-    border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;
-    box-shadow: 0 2px 6px rgba(18,40,61,0.06);
-    flex:1; /* supaya sejajar rapi */
-  }
-  .btn-add{background:var(--accent);color:white;}
-  .btn-clear{background:#f1f1f1;color:#333;}
-  .btn-delete{background:var(--danger);color:white;}
-  .btn-export{background:#ffbf00;color:#222;}
+.controls{
+  display:flex;
+  gap:10px; /* beri jarak antar tombol */
+  flex-wrap:nowrap;
+  width:100%;
+  justify-content:flex-start; /* tombol rata kiri */
+}
+
+button{
+  border:0;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  height:44px; /* ✅ tinggi konsisten */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 2px 6px rgba(18,40,61,0.06);
+  flex:1; /* supaya lebar sama */
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+button:active{ transform: scale(0.97); }
+
+/* Warna tombol */
+.btn-add{background:var(--accent);color:white;}
+.btn-clear{background:#f8f9fa;color:#333;}
+.btn-delete{background:var(--danger);color:white;}
+.btn-export{background:#ffbf00;color:#222;}
 
   .table-wrap{
     background:var(--card);
